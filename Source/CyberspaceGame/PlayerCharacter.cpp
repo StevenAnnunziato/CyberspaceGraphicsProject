@@ -37,7 +37,8 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OnBeginOverlap);
 }
 
 // Called every frame
@@ -93,3 +94,20 @@ void APlayerCharacter::MoveRight(float axis)
 	}
 }
 
+void APlayerCharacter::OnBeginOverlap(UPrimitiveComponent* pHitComp, AActor* pOtherActor,
+	UPrimitiveComponent* pOtherComponent, int32 otherBodyIndex, bool bFromSweep, const FHitResult& sweepResult)
+{
+	
+	if (pOtherActor->ActorHasTag("Enemy"))
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Hit Enemy"));
+	}
+	else if (pOtherActor->ActorHasTag("Pickup"))
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Hit Pickup"));
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Hit Unknown"));
+	}
+}

@@ -35,6 +35,11 @@ public:
 
 	bool mIsDead;
 
+	UFUNCTION()
+		void OnBeginOverlap(class UPrimitiveComponent* pHitComp, class AActor* pOtherActor,
+			class UPrimitiveComponent* pOtherComponent, int32 otherBodyIndex, bool bFromSweep,
+			const FHitResult &sweepResult);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
