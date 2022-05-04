@@ -4,6 +4,9 @@
 #include "PlayerCharacter.h"
 
 #include "Components/CapsuleComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "GameFramework/Actor.h"
+#include "Kismet/GameplayStatics.h"
 
 // Constructor
 APlayerCharacter::APlayerCharacter()
@@ -31,6 +34,7 @@ APlayerCharacter::APlayerCharacter()
 	FollowCamera->bUsePawnControlRotation = false; // camera does not rotate relative to the arm
 
 	mIsDead = false;
+	mAirJumpsRemaining = mMaxAirJumps;
 }
 
 // Called when the game starts or when spawned
@@ -39,13 +43,14 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OnBeginOverlap);
+
+	mAirJumpsRemaining = mMaxAirJumps;
 }
 
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
@@ -58,8 +63,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAxis("TurnUp", this, &APawn::AddControllerPitchInput);
 
 	// bind jumping
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &APlayerCharacter::Jump);
+	//PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::Jump);
 
 	// bind movement
 	PlayerInputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
@@ -94,13 +99,54 @@ void APlayerCharacter::MoveRight(float axis)
 	}
 }
 
+void APlayerCharacter::Jump()
+{
+	//Super::Jump();
+	// if you are in the air
+	if (GetMovementComponent()->IsFalling())
+	{
+		if (mAirJumpsRemaining > 0)
+		{
+			Super::LaunchCharacter(FVector(0.0f, 0.0f, GetCharacterMovement()->JumpZVelocity), false, true);
+			mAirJumpsRemaining--;
+		}
+	}
+	else // on the ground
+	{
+		Super::LaunchCharacter(FVector(0.0f, 0.0f, GetCharacterMovement()->JumpZVelocity), false, true);
+	}
+}
+
+void APlayerCharacter::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+	
+	// reset air jumps
+	mAirJumpsRemaining = mMaxAirJumps;
+}
+
+
 void APlayerCharacter::OnBeginOverlap(UPrimitiveComponent* pHitComp, AActor* pOtherActor,
-	UPrimitiveComponent* pOtherComponent, int32 otherBodyIndex, bool bFromSweep, const FHitResult& sweepResult)
+                                      UPrimitiveComponent* pOtherComponent, int32 otherBodyIndex, bool bFromSweep, const FHitResult& sweepResult)
 {
 	
 	if (pOtherActor->ActorHasTag("Enemy"))
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Hit Enemy"));
+
+		// die
+		if (!mIsDead)
+		{
+			mIsDead = true;
+
+			// ragdoll
+			GetMesh()->SetSimulatePhysics(true);
+
+			// restart after a few seconds
+			FTimerHandle UnusedHandle;
+			GetWorldTimerManager().SetTimer(UnusedHandle, this, &APlayerCharacter::RestartGame, 3.0f, false);
+		}
+		
 	}
 	else if (pOtherActor->ActorHasTag("Pickup"))
 	{
@@ -110,4 +156,9 @@ void APlayerCharacter::OnBeginOverlap(UPrimitiveComponent* pHitComp, AActor* pOt
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Hit Unknown"));
 	}
+}
+
+void APlayerCharacter::RestartGame()
+{
+	UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
 }

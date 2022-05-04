@@ -11,7 +11,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Blueprint/UserWidget.h"
 
 #include "PlayerCharacter.generated.h"
 
@@ -32,13 +31,20 @@ public:
 
 	void MoveForward(float axis);
 	void MoveRight(float axis);
+	void Jump();
+	void Landed(const FHitResult& Hit) override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Jump Settings")
+		int mMaxAirJumps;
+	int mAirJumpsRemaining;
 	bool mIsDead;
 
 	UFUNCTION()
 		void OnBeginOverlap(class UPrimitiveComponent* pHitComp, class AActor* pOtherActor,
 			class UPrimitiveComponent* pOtherComponent, int32 otherBodyIndex, bool bFromSweep,
 			const FHitResult &sweepResult);
+
+	void RestartGame();
 
 protected:
 	// Called when the game starts or when spawned
