@@ -39,6 +39,9 @@ public:
 	int mAirJumpsRemaining;
 	bool mIsDead;
 
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+		void OnDoubleJump();
+
 	UFUNCTION()
 		void OnBeginOverlap(class UPrimitiveComponent* pHitComp, class AActor* pOtherActor,
 			class UPrimitiveComponent* pOtherComponent, int32 otherBodyIndex, bool bFromSweep,

@@ -107,6 +107,7 @@ void APlayerCharacter::Jump()
 	{
 		if (mAirJumpsRemaining > 0)
 		{
+			OnDoubleJump();
 			Super::LaunchCharacter(FVector(0.0f, 0.0f, GetCharacterMovement()->JumpZVelocity), false, true);
 			mAirJumpsRemaining--;
 		}
@@ -124,7 +125,6 @@ void APlayerCharacter::Landed(const FHitResult& Hit)
 	// reset air jumps
 	mAirJumpsRemaining = mMaxAirJumps;
 }
-
 
 void APlayerCharacter::OnBeginOverlap(UPrimitiveComponent* pHitComp, AActor* pOtherActor,
                                       UPrimitiveComponent* pOtherComponent, int32 otherBodyIndex, bool bFromSweep, const FHitResult& sweepResult)
