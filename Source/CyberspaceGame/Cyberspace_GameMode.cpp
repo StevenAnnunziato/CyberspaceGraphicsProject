@@ -2,4 +2,36 @@
 
 
 #include "Cyberspace_GameMode.h"
+#include "GameFramework/Actor.h"
 
+
+ACyberspace_GameMode::ACyberspace_GameMode()
+{
+	PrimaryActorTick.bCanEverTick = true;
+}
+
+void ACyberspace_GameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// spawn an enemy every few seconds
+	FTimerHandle UnusedHandle;
+	GetWorldTimerManager().SetTimer(UnusedHandle, this, &ACyberspace_GameMode::SpawnEnemy, FMath::RandRange(2.0f, 5.0f), true);
+}
+
+void ACyberspace_GameMode::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
+void ACyberspace_GameMode::SpawnEnemy()
+{
+	float randX = FMath::RandRange(SpawnXBounds.X, SpawnXBounds.Y);
+	float randY = FMath::RandRange(SpawnYBounds.X, SpawnYBounds.Y);
+	float randZ = FMath::RandRange(SpawnZBounds.X, SpawnZBounds.Y);
+
+	FVector SpawnPosition = FVector(randX, randY, randZ);
+	FRotator SpawnRotation = FRotator(0.0f, 0.0f, 0.0f);
+
+	GetWorld()->SpawnActor(Enemy, &SpawnPosition, &SpawnRotation);
+}
