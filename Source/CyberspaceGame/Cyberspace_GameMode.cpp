@@ -16,7 +16,7 @@ void ACyberspace_GameMode::BeginPlay()
 
 	// spawn an enemy every few seconds
 	FTimerHandle UnusedHandle;
-	GetWorldTimerManager().SetTimer(UnusedHandle, this, &ACyberspace_GameMode::SpawnEnemy, FMath::RandRange(2.0f, 5.0f), true);
+	GetWorldTimerManager().SetTimer(UnusedHandle, this, &ACyberspace_GameMode::SpawnEnemy, FMath::RandRange(1.0f, 3.5f), true);
 }
 
 void ACyberspace_GameMode::Tick(float DeltaTime)
